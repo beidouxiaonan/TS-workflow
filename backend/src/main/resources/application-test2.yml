@@ -1,0 +1,6 @@
+# 测试环境二：必须提供本环境的连接信息，不复用测试环境一。
+spring:
+  datasource:
+    url: "${NUZAR_DB_URL}"
+    username: "${NUZAR_DB_USERNAME}"
+    password: "${NUZAR_DB_PASSWORD}"

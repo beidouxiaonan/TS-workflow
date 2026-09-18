@@ -1,0 +1,6 @@
+# 测试环境一；连接信息统一由 deployment.test1.env 或运行环境提供。
+spring:
+  datasource:
+    url: "${NUZAR_DB_URL}"
+    username: "${NUZAR_DB_USERNAME}"
+    password: "${NUZAR_DB_PASSWORD}"
