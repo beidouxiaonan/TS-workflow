@@ -107,7 +107,7 @@ id：必填路径参数，最多 32 字符；applicant：必填 query 字符串�
 {"status":"UP"}
 ```
 
-说明：只表示 Web 服务已启动，不执行 OceanBase 连通性检查。
+说明：只表示 Web 服务已启动，不执行 MySQL 8.0 连通性检查。
 
 ## 3. 查询工单列表
 
@@ -305,8 +305,8 @@ POST /api/v1/tickets/KB-20260915103000-1001/submit
 
 数组顺序即标准工单流程顺序。
 
-## 1.0.8 期望完成时间
+## 1.0.9 期望完成时间
 
 创建、更新工单可传 expectedCompletionTime。列表 items、详情以及提交/审核/退回/完成任务/撤销返回的工单对象均包含该字段；操作接口仍使用已保存值，不新增动作请求参数。日期格式错误返回 400。未增加必须为未来时间的限制，避免历史数据更新受阻。
 
-已有库先执行 db/migration/V5__add_expected_completion_time.sql 一次，再部署新 JAR；新库使用 backend/sql/init-oceanbase.sql。数据库变更需由部署人员执行。
+已有库先执行 db/migration/V5__add_expected_completion_time.sql 一次，再部署新 JAR；新库使用 backend/sql/init-mysql.sql。数据库变更需由部署人员执行。

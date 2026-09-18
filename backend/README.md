@@ -1,6 +1,6 @@
 # 知识工单 REST API
 
-独立 Spring Boot 2.7 后端，仅提供 JSON API，不包含前端和 Docker 配置。运行环境为 Java 8+，数据持久化使用 OceanBase MySQL 兼容模式。
+独立 Spring Boot 2.7 后端，仅提供 JSON API，不包含前端和 Docker 配置。运行环境为 Java 8+，数据持久化使用 MySQL 8.0。
 
 ## 构建与运行
 
@@ -47,7 +47,7 @@ java -jar target/knowledge-ticket-api.jar --spring.profiles.active=test1
 
 ```bash
 cp deployment.env.example deployment.env
-# 编辑 deployment.env 中的 OceanBase 连接信息
+# 编辑 deployment.env 中的 MySQL 8.0 连接信息
 ./deploy.sh
 ```
 
@@ -62,18 +62,18 @@ cp deployment.env.example deployment.env
 
 脚本会检查 Java 8、备份旧 JAR、使用 TERM 信号平滑停止、原子替换 JAR、启动服务，并等待 `/api/health` 健康检查通过。旧版本保存在 `runtime/backup/`。
 
-默认监听 `8080`。更换 OceanBase 时只需修改环境变量，无需重新编译：
+默认监听 `8080`。更换 MySQL 8.0 时只需修改环境变量，无需重新编译：
 
 ```bash
-export DB_URL='jdbc:oceanbase://oceanbase-host:2881/knowledge_ticket?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai'
-export DB_USERNAME='app_user@tenant'
+export DB_URL='jdbc:mysql://mysql-host:3306/ekbdb?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai'
+export DB_USERNAME='app_user'
 export DB_PASSWORD='your-password'
 java -jar target/knowledge-ticket-api.jar
 ```
 
-项目使用随包提供的 `oceanbase-client-2.4.14.1.jar`，驱动类为 `com.oceanbase.jdbc.Driver`，最终可执行 JAR 已内嵌该驱动，不需要在服务器额外安装 JDBC 包。
+本分支使用 Maven 管理的 com.mysql:mysql-connector-j 8.0.33，驱动类为 com.mysql.cj.jdbc.Driver；不再依赖本地 OceanBase 驱动 JAR。
 
-全新环境执行 [init-oceanbase.sql](sql/init-oceanbase.sql)，包含建库、选择数据库和最新两张业务表，默认库名 ekbdb，需与 JDBC URL 一致。没有建库权限时由 DBA 建库，然后在目标库执行 [schema-oceanbase.sql](src/main/resources/db/schema-oceanbase.sql)。生产环境默认不自动建表；临时环境可设置 `DB_INIT_MODE=always`。CREATE TABLE IF NOT EXISTS 不会升级已有表：已有库仍需按实际结构执行未执行的 V2/V3/V4 迁移；新库不需要重复执行这些迁移。
+全新环境执行 [init-mysql.sql](sql/init-mysql.sql)，包含建库、选择数据库和最新两张业务表，默认库名 ekbdb，需与 JDBC URL 一致。没有建库权限时由 DBA 建库，然后在目标库执行 [schema-mysql.sql](src/main/resources/db/schema-mysql.sql)。生产环境默认不自动建表；临时环境可设置 `DB_INIT_MODE=always`。CREATE TABLE IF NOT EXISTS 不会升级已有表：已有库仍需按实际结构执行未执行的 V2/V3/V4 迁移；新库不需要重复执行这些迁移。
 
 首次启动执行 `bash deploy.sh start test1` 或 `bash deploy.sh restart test1`：若 runtime/test1/knowledge-ticket-api.jar 不存在，自动从 target/knowledge-ticket-api.jar 复制后启动。可在 deployment.test1.env 配置 SOURCE_JAR 指向已有发布包，相对路径以 deploy.sh 所在目录为准。脚本不自动编译，也不执行数据库 SQL；源包不存在会明确报错。runtime 已有 JAR 时 start/restart 不替换它，更新版本仍使用 deploy。省略环境名则使用 runtime 目录。
 
@@ -119,7 +119,7 @@ export LOG_TOTAL_SIZE_CAP=2GB
 | POST | `/api/v1/tickets/{id}/complete-task` | 完成任务并提交验收 |
 | GET | `/api/v1/tickets/workflow` | 查询流程节点 |
 
-创建或更新工单时，`attachmentIds` 是普通字符串字段；submit 无请求体，使用已保存的数据。多个附件 ID 可使用逗号分隔；后端原样保存到 OceanBase `TEXT` 列，不解析为 Java List。旧版本已保存的 JSON 数组文本也会原样读取。再次更新时以最新字符串覆盖数据库内容，因此新增、替换和删除附件都会被持久化：
+创建或更新工单时，`attachmentIds` 是普通字符串字段；submit 无请求体，使用已保存的数据。多个附件 ID 可使用逗号分隔；后端原样保存到 MySQL 8.0 `TEXT` 列，不解析为 Java List。旧版本已保存的 JSON 数组文本也会原样读取。再次更新时以最新字符串覆盖数据库内容，因此新增、替换和删除附件都会被持久化：
 
 ```json
 {
@@ -153,6 +153,6 @@ export LOG_TOTAL_SIZE_CAP=2GB
 
 PID 文件缺失、路径更改或手动启动的进程不能被可靠识别，脚本不会按模糊名称批量杀进程。此时请核对运行命令和环境目录后人工处理。服务存活检查不等于健康检查。
 
-### 1.0.8 期望完成时间
+### 1.0.9 期望完成时间
 
-新增可选字段 expectedCompletionTime，创建/更新接收、所有工单对象响应返回。示例 `2026-09-30T18:00:00.000+08:00`。已有库部署前执行 `src/main/resources/db/migration/V5__add_expected_completion_time.sql` 一次；新库使用最新 `sql/init-oceanbase.sql`，无需再执行 V5。
+新增可选字段 expectedCompletionTime，创建/更新接收、所有工单对象响应返回。示例 `2026-09-30T18:00:00.000+08:00`。已有库部署前执行 `src/main/resources/db/migration/V5__add_expected_completion_time.sql` 一次；新库使用最新 `sql/init-mysql.sql`，无需再执行 V5。

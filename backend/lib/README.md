@@ -1,3 +1,3 @@
 # JDBC 驱动
 
-自行取得并在本目录放置 oceanbase-client-2.4.14.1.jar。该第三方二进制不随公开仓库分发。
+MySQL 分支通过 Maven 获取 Connector/J 8.0.33，无需在本目录放置任何驱动 JAR。
