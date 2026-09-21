@@ -9,7 +9,7 @@
   </parent>
   <groupId>com.zhixing</groupId>
   <artifactId>knowledge-ticket-api</artifactId>
-  <version>1.0.8</version>
+  <version>1.0.11</version>
   <name>knowledge-ticket-api</name>
   <description>知识工单系统 REST API</description>
   <properties>

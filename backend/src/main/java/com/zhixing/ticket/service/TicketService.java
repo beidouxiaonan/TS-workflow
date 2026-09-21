@@ -46,7 +46,7 @@ public class TicketService {
     @Transactional public void deleteDraft(String id,String applicant){
         repository.lock(id);
         Ticket ticket=get(id);checkApplicant(ticket,applicant);
-        if(!"草稿".equals(ticket.getStatus()) || !"填写申请".equals(ticket.getCurrentNode()))throw new IllegalStateException("只能删除草稿工单");
+        if(!("草稿".equals(ticket.getStatus()) || "已退回".equals(ticket.getStatus())) || !"填写申请".equals(ticket.getCurrentNode()))throw new IllegalStateException("只能删除填写申请节点的草稿或已退回工单");
         repository.deleteDraft(id);
     }
     private void checkApplicant(Ticket ticket,String applicant){

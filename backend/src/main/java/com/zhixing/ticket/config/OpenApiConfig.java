@@ -13,7 +13,7 @@ public class OpenApiConfig {
         return new OpenAPI().info(new Info()
             .title("知识工单系统 REST API")
             .description("知识工单申请、审批、知识上传、验收及附件 ID 持久化接口")
-            .version("1.0.8")
+            .version("1.0.11")
             .contact(new Contact().name("知识工单系统维护团队")));
     }
 }

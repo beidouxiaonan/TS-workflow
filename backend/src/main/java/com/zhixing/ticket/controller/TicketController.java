@@ -28,7 +28,7 @@ public class TicketController {
     @GetMapping("/{id}") public Ticket detail(@PathVariable @Size(max=32) String id){return service.get(id);}
     @io.swagger.v3.oas.annotations.Operation(summary="申请者撤销待审批工单，返回草稿")
     @PostMapping("/{id}/withdraw") public Ticket withdraw(@PathVariable @Size(max=32) String id,@Valid @RequestBody com.zhixing.ticket.model.WithdrawRequest request){return service.withdraw(id,request);}
-    @io.swagger.v3.oas.annotations.Operation(summary="申请者永久删除草稿及流程记录，不删除附件文件")
+    @io.swagger.v3.oas.annotations.Operation(summary="申请者永久删除草稿或已退回工单及流程记录，不删除附件文件")
     @DeleteMapping("/{id}") @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteDraft(@PathVariable @Size(max=32) String id,@RequestParam @javax.validation.constraints.NotBlank @Size(max=64) String applicant){service.deleteDraft(id,applicant);}
     @PostMapping @ResponseStatus(HttpStatus.CREATED) public Ticket create(@Valid @RequestBody Ticket ticket){return service.create(ticket);}
